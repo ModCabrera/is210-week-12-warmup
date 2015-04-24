@@ -50,14 +50,18 @@ class CustomLogger(object):
         handled = []
         try:
             fhandler = open(self.logfilename, 'a')
-            for index, entry in enumerate(self.msgs):
+        except IOError as OpenError:
+            self.log('This File cannot be opened.')
+            raise OpenError
+        for index, entry in enumerate(self.msgs):
+            try:
                 fhandler.write(str(entry) + '\n')
                 handled.append(index)
+            except IOError as WriteError:
+                self.log('This File cannot be written.')
+                break
 
-            fhandler.close()
+        fhandler.close()
 
-            for index in handled[::-1]:
-                del self.msgs[index]
-        except IOError:
-            self.log(IOError)
-            raise IOError
+        for index in handled[::-1]:
+            del self.msgs[index]
